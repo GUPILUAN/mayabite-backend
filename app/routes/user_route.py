@@ -60,9 +60,10 @@ def login() -> tuple[Response,int]:
 @user_bp.route('/reset_request', methods=['GET', 'POST'])
 def reset_request() -> str | tuple[Response,int]:
     if request.method == 'POST':
-        email = request.form.get("email")
+        data : dict =  request.get_json()
+        email : str | None = request.form.get("email") if not data.get("email") else data.get("email")
         if not email:
-            return jsonify({"error": "El correo es necesario"}), 400
+            return jsonify({"message": "El correo es necesario"}), 400
         # Crear el token de acceso con JWT
         reset_token : str = create_access_token(identity=email, expires_delta=timedelta(minutes=5))
         try:
