@@ -2,12 +2,12 @@ from app.config.config import Mail
 from flask import Blueprint, request, make_response, jsonify, render_template, Response
 from flask_jwt_extended import create_access_token, jwt_required, decode_token, get_jwt_identity
 from datetime import timedelta
-from app.models.models import User
+from app.models.user_model import User
 
 user_bp : Blueprint = Blueprint("user_bp", __name__)
 
 #Registering route
-@user_bp.route("/register", methods = ["POST"])
+@user_bp.route("/user/register", methods = ["POST"])
 def register() -> tuple[Response,int]: 
     #Se obtiene los datos del body
     data : dict = request.get_json()
@@ -29,7 +29,7 @@ def register() -> tuple[Response,int]:
 
 
 #Verification route
-@user_bp.route("/verify/<token>", methods=["GET"])
+@user_bp.route("/user/verify/<token>", methods=["GET"])
 def verify_email(token : str) -> tuple[Response,int]:
     #intenta decodificar el token para saber que email se esta verificando.
     try:
@@ -43,7 +43,7 @@ def verify_email(token : str) -> tuple[Response,int]:
         #return (jsonify({"message" : "Account confirmed"}),200) if user_verified else (jsonify({"message" : "Invalid token"}), 400)
 
 #Login route
-@user_bp.route("/login", methods=["POST"])
+@user_bp.route("/user/login", methods=["POST"])
 def login() -> tuple[Response,int]:
     #Se obtiene los datos del body
     data : dict = request.get_json()
@@ -57,7 +57,7 @@ def login() -> tuple[Response,int]:
     return jsonify(access_token=access_token),200
 
 
-@user_bp.route('/reset_request', methods=['GET', 'POST'])
+@user_bp.route('/user/reset_request', methods=['GET', 'POST'])
 def reset_request() -> str | tuple[Response,int]:
     if request.method == 'POST':
         data : dict =  request.get_json()
@@ -77,7 +77,7 @@ def reset_request() -> str | tuple[Response,int]:
     return render_template("reset.html")
 
 #reset password view route
-@user_bp.route("/reset/<token>", methods=["GET"])
+@user_bp.route("/user/reset/<token>", methods=["GET"])
 def reset_password_view(token : str) -> str | tuple[Response,int]:
     try:
         email : str | None = decode_token(token).get("sub")
@@ -86,11 +86,10 @@ def reset_password_view(token : str) -> str | tuple[Response,int]:
     return render_template("reset_password.html",email=email)
 
 #Reset password route
-@user_bp.route("/reset_password", methods=["POST"])
+@user_bp.route("/user/reset_password", methods=["PATCH", "POST"])
 def reset_password():
     email: str | None = request.form.get("email")
     password : str | None = request.form.get("new_password")
-   
     # Cambiar la contraseña
     result : bool = User.change_password(email, password)
 
@@ -101,7 +100,7 @@ def reset_password():
     
 
 #Protected route
-@user_bp.route("/protected", methods=["GET"])
+@user_bp.route("/user/protected", methods=["GET"])
 @jwt_required()
 def protected() -> tuple[Response,int]:
     current_user : str = get_jwt_identity()

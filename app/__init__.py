@@ -25,12 +25,10 @@ def create_app() -> Flask:
     #Rutas
     from app.routes.user_route import user_bp
     app.register_blueprint(user_bp)
-
-
-    #Test
-    @app.route('/')
-    def home():
-        return 'Hello, Flask!'
+    from app.routes.product_route import product_bp
+    app.register_blueprint(product_bp)
+    from app.routes.store_route import store_bp
+    app.register_blueprint(store_bp)
 
     return app
     

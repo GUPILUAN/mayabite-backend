@@ -1,8 +1,9 @@
 from pymongo import ReturnDocument
 from app import mongo, bcrypt
+from datetime import datetime
 
 class User:
-    
+
     @staticmethod
     def create_user(data : dict) -> tuple[dict,int]:
         #Verifica que exista la base de datos
@@ -13,6 +14,7 @@ class User:
             username : str = data["username"]
             email : str = data["email"]
             password : str = data["password"]
+            phone : str = data["phone"]
         except KeyError as e:
             print("Error:", e)
             return {"message" : "Data error"}, 400
@@ -26,6 +28,8 @@ class User:
         if email_already_used:
             return {"message": "email already used"},400
         
+        if len(password) < 8:
+            return {"message" : "Password must be at least 8 characters long"},400
         #Si pasa todos los filtros encripta la contraseña
         hashed_password : str = bcrypt.generate_password_hash(password).decode("utf-8")
 
@@ -33,11 +37,15 @@ class User:
             "username": username,
             "email": email,
             "password": hashed_password,
+            "phone": phone,
             "is_active": True,
-            "confirmed" : False,
+            "confirmed_account" : False,
             "is_admin": False,
             "is_delivery_man": False,
-            "is_working":False
+            "is_working":False,
+            "is_banned": False,
+            "last_login": None,
+            "created_at": datetime.now(),
         }
 
         #Verdadero si se creó con éxito, Falso si hubo algun problema
@@ -52,7 +60,7 @@ class User:
         #Filtro
         filter_ : dict = {"email": email}
         #Valor que se va a cambiar
-        new_value : dict = {"$set": {"confirmed": True}}
+        new_value : dict = {"$set": {"confirmed_account": True}}
         #Regresa None si no encontró nada, regresa el documento actualizado si lo consigue
         updated_doc : dict | None = mongo.db.users.find_one_and_update(
             filter_,
@@ -91,8 +99,8 @@ class User:
         
     @staticmethod
     def change_password(user_email : str | None, new_password : str | None)->bool:
-        #Verifica que exista la base de datos
-        if mongo.db  is None or not user_email or not new_password:
+        #Verifica que exista la base de datos y demás datos esten
+        if not user_email or not new_password or len(new_password) < 8 or mongo.db  is None:
             return False
         filter_ : dict = {"email": user_email}
         hashed_password : str = bcrypt.generate_password_hash(new_password).decode("utf-8")
@@ -103,48 +111,3 @@ class User:
             return_document= ReturnDocument.AFTER
         )
         return updated_doc is not None
-
-class Product:
-    @staticmethod
-    def get_all() -> list[dict]:
-        #Verifica que exista la base de datos
-        if mongo.db is None:
-            return []
-        return list(mongo.db.products.find())
-    
-    @staticmethod
-    def get_one(id : str)-> dict | None:
-        #Verifica que exista la base de datos
-        if mongo.db is None:
-            return
-        return mongo.db.products.find_one({"_id": id})
-    
-    @staticmethod
-    def add_one(prod : dict) -> None:
-        #Verifica que exista la base de datos
-        if mongo.db is None:
-            return
-        mongo.db.products.insert_one(prod)
-
-    @staticmethod
-    def add_many(prods : dict) -> None:
-        #Verifica que exista la base de datos
-        if mongo.db is None:
-            return
-        mongo.db.products.insert_many(prods)
-
-    @staticmethod
-    def delete(prod) -> None:
-        #Verifica que exista la base de datos
-        if mongo.db is None:
-            return
-        mongo.db.products.delete_one(prod)
-
-class Store:
-    @staticmethod
-    def get_all() -> list[dict]:
-        #Verifica que exista la base de datos
-        if mongo.db is None:
-            return []
-        return list(mongo.db.stores.find())
-    
