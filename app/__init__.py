@@ -29,6 +29,8 @@ def create_app() -> Flask:
     app.register_blueprint(product_bp)
     from app.routes.store_route import store_bp
     app.register_blueprint(store_bp)
+    from app.routes.category_route import category_bp
+    app.register_blueprint(category_bp)
 
     return app
     
