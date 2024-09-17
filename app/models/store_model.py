@@ -1,5 +1,6 @@
 from app import mongo
 from bson import ObjectId
+import base64
 
 class Store:
     
@@ -11,6 +12,9 @@ class Store:
         stores : list = list(mongo.db.stores.find())
         for store in stores:
             store["_id"] = str(store["_id"])
+            image_base64 = base64.b64encode(store["image"]).decode("utf-8")
+            store["image"] = image_base64
+
         return stores
     
     @staticmethod
@@ -25,6 +29,9 @@ class Store:
         new_store : dict = {
             "name": data["name"],
             "location": data["location"],
+            "image": data["image"],
+            "description": data["description"],
+            "category" : data["category"],
             "inventory" : []
         }
         return mongo.db.stores.insert_one(new_store).acknowledged

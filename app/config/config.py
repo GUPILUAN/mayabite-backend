@@ -9,6 +9,8 @@ class Config:
     MONGO_URI : str | None  = os.getenv("MONGO_URI") #MONGO URI en el .env
     JWT_SECRET_KEY : str | None = os.getenv("JWT_SECRET_KEY") #JWT SECRET KEY en el .env
     BCRYPT_LOG_ROUNDS : int = 12 #salty del JWT
+    MAX_CONTENT_LENGTH : int = 16 * 1024 * 1024
+    
 
 
 class Mail:
