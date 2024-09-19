@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agregar productos</title>
+  </head>
+  <body>
+    <h1>Agregar productos</h1>
+
+    <form id="productForm">
+      <input type="hidden" name="id" id="id" value="{{ id }}" />
+
+      <!-- Productos -->
+      <label for="producto">Producto:</label><br />
+      <select id="producto" name="producto" required>
+        {% for producto in productos %}
+        <option value="{{ producto._id }}">{{ producto.name }}</option>
+        {% endfor %}</select
+      ><br />
+      <input
+        type="number"
+        name="cantidad"
+        id="cantidad"
+        required
+        placeholder="cantidad"
+      /><br />
+
+      <button type="submit">Agregar al array</button>
+    </form>
+
+    <h2>Productos actuales:</h2>
+    <ul id="productList"></ul>
+
+    <button id="sendData">Enviar al backend</button>
+
+    <script>
+      // Declaramos un array vacío para los productos
+      const productArray = [];
+
+      // Referencias a elementos HTML
+      const form = document.getElementById("productForm");
+      const productList = document.getElementById("productList");
+      const sendDataButton = document.getElementById("sendData");
+
+      const storeId = document.getElementById("id").value;
+
+      // Evento submit para agregar productos al array
+      form.addEventListener("submit", function (event) {
+        event.preventDefault(); // Evitamos que se recargue la página
+        // Obtenemos los valores del formulario
+        const productId = document.getElementById("producto").value;
+        const cantidad = document.getElementById("cantidad").value;
+        // Crear un objeto para el producto
+        const product = {
+          id: productId,
+          stock: cantidad,
+        };
+
+        // Agregar el objeto al array
+        if (productArray.length < 1) {
+          productArray.push(product);
+        } else {
+          productArray.map((prod, index) => {
+            if (prod.id != productId) {
+              productArray.push(product);
+            }
+          });
+        }
+
+        // Limpiar el formulario
+        form.reset();
+
+        // Actualizar la lista visualmente
+        renderProductList();
+      });
+
+      // Función para mostrar la lista de productos
+      function renderProductList() {
+        // Limpiar la lista
+        productList.innerHTML = "";
+
+        // Recorremos el array y lo mostramos en la lista
+        productArray.forEach((product, index) => {
+          const li = document.createElement("li");
+          li.textContent = `Producto: ${index}`;
+          productList.appendChild(li);
+        });
+      }
+
+      // Evento para enviar los datos al backend
+      sendDataButton.addEventListener("click", function () {
+        // Aquí puedes enviar el array de productos al backend
+        fetch("{{ url_for('store_bp.add_products', id='') }}" + storeId, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(productArray), // Enviamos el array como JSON
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Datos enviados exitosamente:", data);
+            alert("Datos enviados al backend");
+          })
+          .catch((error) => {
+            console.error("Error al enviar los datos:", error);
+            alert("Hubo un error al enviar los datos");
+          });
+      });
+    </script>
+  </body>
+</html>

@@ -3,7 +3,14 @@ from bson import ObjectId
 import base64
 
 class Store:
-    
+    #Model
+    def __init__(self, name : str, price : float, description : str, image : bytes, category : str) -> None:
+        self.name : str = name
+        self.price : float = price
+        self.description : str = description
+        self.image : bytes = image
+        self.category : str = category
+
     @staticmethod
     def get_all_stores() -> list[dict]:
         #Verifica que exista la base de datos
@@ -32,7 +39,9 @@ class Store:
             "image": data["image"],
             "description": data["description"],
             "category" : data["category"],
-            "inventory" : []
+            "inventory" : [],
+            "stars" : 0,
+            "reviews" : 0
         }
         return mongo.db.stores.insert_one(new_store).acknowledged
     
@@ -44,7 +53,9 @@ class Store:
         store : dict | None = mongo.db.stores.find_one({"_id": ObjectId(store_id)})
         if store:
             store["_id"] = str(store["_id"])
-            
+            image_base64 = base64.b64encode(store["image"]).decode("utf-8")
+            store["image"] = image_base64
+
         return store
     
     @staticmethod
@@ -55,7 +66,7 @@ class Store:
         store : dict | None = mongo.db.stores.find_one({"_id": ObjectId(store_id)})
         if store:
             for product in store["inventory"]:
-                product["_id"] = str(product["_id"])
+                product["id"] = str(product["id"])
             return store["inventory"]
         return []
 
@@ -64,12 +75,19 @@ class Store:
         #Verifica que exista la base de datos
         if mongo.db is None:
             return False
-        filter_ : dict = {"_id": ObjectId(store_id)}
+        try:
+            filter_ : dict = {"_id": ObjectId(store_id)}
+        except: 
+            return False
         #Verifica que el almacen exista
         store : dict | None = mongo.db.stores.find_one(filter_)
         if store is None:
             return False
-        #Valor que se va a cambiar
+    
+       # Crear un conjunto con los IDs de los productos en la inventory
+        inventory_ids = {product["id"] for product in store["inventory"]}
+        products = [p for p in products if p["id"] not in inventory_ids]
+
         new_inventory : list = store["inventory"] + products
     
         updated_doc : bool = mongo.db.stores.update_one(
@@ -97,4 +115,5 @@ class Store:
         ).acknowledged
 
         return updated_doc
+    
     

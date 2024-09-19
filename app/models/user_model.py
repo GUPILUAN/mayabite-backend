@@ -1,8 +1,16 @@
 from pymongo import ReturnDocument
 from app import mongo, bcrypt
 from datetime import datetime
+from bson import ObjectId
 
 class User:
+    #Model
+    def __init__(self, username :str , email:str, password:str, phone:str)->None:
+        self.username :str = username
+        self.email : str = email
+        self.password : str= password
+        self.phone :str = phone
+
 
     @staticmethod
     def create_user(data : dict) -> tuple[dict,int]:
@@ -46,6 +54,7 @@ class User:
             "is_banned": False,
             "last_login": None,
             "created_at": datetime.now(),
+            "payment_card" : None
         }
 
         #Verdadero si se creó con éxito, Falso si hubo algun problema
@@ -91,6 +100,9 @@ class User:
         # y sólo si esta verificado su email, le permite entrar
         if bcrypt.check_password_hash(user["password"], password):
             if user["confirmed"] == True:
+                filter_ : dict = {"email": user["email"]}
+                new_value : dict = {"$set": {"last_login": datetime.now()}}
+                mongo.db.users.update_one(filter_, new_value)
                 return {"email" : email},200
             else:
                 return {"message" : "Account not confirmed"}, 401
@@ -111,3 +123,14 @@ class User:
             return_document= ReturnDocument.AFTER
         )
         return updated_doc is not None
+    
+    @staticmethod
+    def add_payment_method(user_id : str, card : str) -> bool:
+        #Verifica que exista la base de datos y demás datos esten
+        if not user_id or not card or mongo.db is None:
+            return False
+        filter_ : dict = {"_id": ObjectId(user_id)}
+        card_encrypted : str = bcrypt.generate_password_hash(card).decode("utf-8")
+        new_value : dict = {"$set": {"payment_card": card}}
+        return mongo.db.users.update_one(filter_, new_value).acknowledged
+

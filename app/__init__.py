@@ -31,8 +31,8 @@ def create_app() -> Flask:
     app.register_blueprint(store_bp)
     from app.routes.category_route import category_bp
     app.register_blueprint(category_bp)
-    from app.routes.location_route import location_bp
-    app.register_blueprint(location_bp)
+    from app.routes.featured_route import featured_bp
+    app.register_blueprint(featured_bp)
 
     return app
     

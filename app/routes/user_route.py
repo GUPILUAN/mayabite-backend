@@ -105,3 +105,25 @@ def reset_password():
 def protected() -> tuple[Response,int]:
     current_user : str = get_jwt_identity()
     return jsonify({'message': f'User {current_user} performed a protected action!'}), 200
+
+#Protected route
+@user_bp.route("/user/addpayent", methods=["GET", "POST"])
+@jwt_required()
+def add_payment_method() -> tuple[Response,int]:
+    current_user : str = get_jwt_identity()
+    if request.method == 'POST':
+        data : dict =  request.get_json()
+        email : str | None = request.form.get("email") if not data.get("email") else data.get("email")
+        if not email:
+            return jsonify({"message": "El correo es necesario"}), 400
+        # Crear el token de acceso con JWT
+        reset_token : str = create_access_token(identity=email, expires_delta=timedelta(minutes=5))
+        try:
+            Mail(email, reset_token, "reset")
+        except:
+            return make_response(render_template("reset.html")),200
+        # Crear la respuesta JSON
+        response : Response = make_response(render_template("reset.html", sent = reset_token is not None))
+        return response,200
+    # Si es una solicitud GET, solo renderizamos el formulario
+    return make_response(render_template("reset.html")),200

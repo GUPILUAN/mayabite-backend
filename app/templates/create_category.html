@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro de producto</title>
+    <style>
+      .drag-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+      }
+      .drag-area.dragging {
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Registro de categoria</h1>
+    <form action="{{ url_for('category_bp.new_category') }}" method="POST">
+      <!-- Nombre -->
+      <label for="nombre">Nombre de la categoria:</label><br />
+      <input type="text" id="nombre" name="nombre" required /><br /><br />
+
+      <!-- Descripción -->
+      <label for="tienda"> Es una categoria para tienda: </label>
+      <input type="checkbox" id="tienda" name="tienda" />
+      <br /><br />
+
+      <button type="submit">Crear categoria</button>
+    </form>
+  </body>
+</html>

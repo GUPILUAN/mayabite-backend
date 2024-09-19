@@ -3,7 +3,8 @@ from flask_jwt_extended import create_access_token, jwt_required, decode_token, 
 from datetime import timedelta
 from app.models.store_model import Store
 from app.models.category_model import Category
-from app.models.location_model import Location
+from app.models.product_model import Product
+from app.models.featured_model import Featured
 
 store_bp : Blueprint = Blueprint("store_bp", __name__)
 
@@ -18,6 +19,21 @@ def register_store2()-> tuple[Response, int]:
 
 @store_bp.route("/api/store/addinventory/<id>", methods=["PUT"])
 def add_inventory(id : str) -> tuple[Response, int]:
+    data : list = request.get_json()
+    return (jsonify({
+        "message" : "Inventario agregado exitosamente"
+        }), 200) if Store.add__product_inventory(id, data) else (jsonify({
+        "message": "Error al agregar inventario"}
+        ), 400)
+
+
+@store_bp.route("/api/store/addproducts/<id>", methods=["GET"])
+def template2(id : str):
+    productos : list = Product.get_all()
+    return render_template('add_products.html', productos=productos, id=id)
+
+@store_bp.route("/api/store/addproducts/<id>", methods=["POST"])
+def add_products(id : str) -> tuple[Response, int]:
     data : list = request.get_json()
     return (jsonify({
         "message" : "Inventario agregado exitosamente"
@@ -50,15 +66,12 @@ def get_all_stores() -> tuple[Response, int]:
 
 @store_bp.route("/api/store/", methods=["GET"])
 def template():
-    ubicaciones : list = [location["name"] for location in Location.get_all_locations()] 
-    categorias : list = [category["name"] for category in Category.get_all_categories()]
+    ubicaciones : list = ["Central", "Salud", "Ingeniería"] 
+    categorias : list = [category["name"] for category in Category.get_category_stores(True)]
     return render_template('store_registry.html', ubicaciones=ubicaciones, categorias=categorias)
 
 @store_bp.route("/api/store/register_v", methods=["POST"])
 def register_store():
-    # Imprimir request.form y request.files para depuración
-    print(f"request.form: {request.form}")
-    print(f"request.files: {request.files}")
 
     nombre = request.form.get('nombre')
     ubicacion = request.form.get('ubicacion')
@@ -91,3 +104,5 @@ def register_store():
         }), 201) if Store.register_store(store) else (jsonify({
         "message": "Error en el registro"
         }), 400)
+
+

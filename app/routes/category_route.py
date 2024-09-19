@@ -9,6 +9,11 @@ def get_categories() -> tuple[Response,int]:
     categories : list = Category.get_all_categories()
     return jsonify(categories),200
 
+@category_bp.route("/api/category/get/<boolean>", methods=["GET"])
+def get_categories_store(boolean : str) -> tuple[Response,int]:
+    categories : list = Category.get_category_stores(boolean=="true")
+    return jsonify(categories),200
+
 @category_bp.route("/api/category/create", methods=["POST"])
 def create_category()-> tuple[Response,int]:
     data : dict = request.get_json()
@@ -17,5 +22,24 @@ def create_category()-> tuple[Response,int]:
         }), 200) if Category.create_category(data) else (jsonify({
         "message":"Category not created"
         }), 400)
-    
 
+
+@category_bp.route("/api/category/", methods=["GET"])
+def template():
+    return render_template('create_category.html')
+
+@category_bp.route("/api/category/register_v", methods=["POST"])
+def new_category():
+    nombre = request.form.get('nombre')
+    is_store_category = request.form.get('tienda')
+
+    cat : dict = {
+        "name": nombre,
+        "is_store_category": is_store_category == "on"
+       
+    }
+    return (jsonify({
+        "message" : "Registro exitoso"
+        }), 201) if Category.create_category(cat) else (jsonify({
+        "message": "Error en el registro"
+        }), 400)
