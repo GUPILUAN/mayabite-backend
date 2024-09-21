@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro de producto</title>
+    <style>
+      .drag-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+      }
+      .drag-area.dragging {
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Registro de Producto</h1>
+    <form
+      action="{{ url_for('product_bp.register_product') }}"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      <!-- Nombre -->
+      <label for="nombre">Nombre del producto:</label><br />
+      <input type="text" id="nombre" name="nombre" required /><br /><br />
+
+      <!-- Descripción -->
+      <label for="descripcion">Descripción:</label><br />
+      <input
+        style="width: 300px"
+        type="text"
+        id="descripcion"
+        name="descripcion"
+        required
+      /><br /><br />
+
+      <!-- Precio -->
+      <label for="precio">Precio del producto:</label><br />
+      <input type="number" id="precio" name="precio" required /><br /><br />
+
+      <!-- Imagen -->
+      <label for="imagen">Imagen del producto:</label><br />
+      <input
+        type="file"
+        id="imagen"
+        name="imagen"
+        accept="image/*"
+        required
+      /><br /><br />
+
+      <div id="drag-area" class="drag-area">
+        Arrastra aquí tu imagen o haz clic para seleccionar
+        <input type="file" id="imagen" name="imagen" required /><br /><br />
+      </div>
+      <button type="button" id="clear-image">Borrar Imagen</button><br /><br />
+
+      <!-- Categoría -->
+      <label for="categoria">Categoria:</label><br />
+      <select id="categoria" name="categoria" required>
+        {% for categoria in categorias %}
+        <option value="{{ categoria }}">{{ categoria }}</option>
+        {% endfor %}</select
+      ><br /><br />
+
+      <button type="submit">Registrar Producto</button>
+    </form>
+
+    <script>
+      const dragArea = document.getElementById("drag-area");
+      const fileInput = document.getElementById("imagen");
+      const clearImageButton = document.getElementById("clear-image");
+
+      // Cuando se hace clic en el área de arrastre, se abre el diálogo de selección de archivos
+      dragArea.addEventListener("click", () => {
+        fileInput.click();
+      });
+
+      // Mostrar el nombre del archivo seleccionado
+      fileInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          dragArea.textContent = file.name;
+        }
+      });
+
+      // Permitir arrastrar y soltar imágenes
+      dragArea.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        dragArea.classList.add("dragging");
+      });
+
+      dragArea.addEventListener("dragleave", () => {
+        dragArea.classList.remove("dragging");
+      });
+
+      dragArea.addEventListener("drop", (event) => {
+        event.preventDefault();
+        dragArea.classList.remove("dragging");
+
+        const file = event.dataTransfer.files[0];
+        if (file) {
+          dragArea.textContent = file.name;
+          fileInput.files = event.dataTransfer.files;
+        }
+      });
+
+      // Limpiar la imagen seleccionada cuando se presiona el botón "Borrar Imagen"
+      clearImageButton.addEventListener("click", () => {
+        fileInput.value = ""; // Limpiar el valor del input de archivo
+        dragArea.textContent =
+          "Arrastra aquí tu imagen o haz clic para seleccionar"; // Restablecer el texto en el área de arrastre
+      });
+    </script>
+  </body>
+</html>
