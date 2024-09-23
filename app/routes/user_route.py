@@ -49,8 +49,10 @@ def login() -> tuple[Response,int]:
     data : dict = request.get_json()
     #Si el resultado tiene un mensaje significa que hubo un error, de lo contrario arroja el access token
     result : tuple = User.login(data)
+    
     if result[0].get("message"):
         return jsonify(result[0]), result[1]
+    
     access_token : str = create_access_token(identity=result[0].get("email"),expires_delta=timedelta(hours=1))
     #response : Response = make_response(jsonify({"message": "Login succeed"}), 200)
     #response.headers['Authorization'] = f"Bearer {access_token}"

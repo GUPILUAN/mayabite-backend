@@ -112,9 +112,6 @@ class User:
         # y sólo si esta verificado su email, le permite entrar
         if bcrypt.check_password_hash(user["password"], password):
             if user["confirmed_account"] == True:
-                filter_ : dict = {"email": user["email"]}
-                new_value : dict = {"$set": {"last_login": datetime.now()}}
-                mongo.db.users.update_one(filter_, new_value)
                 return {"email" : email},200
             else:
                 return {"message" : "Account not confirmed"}, 401
@@ -144,4 +141,13 @@ class User:
         filter_ : dict = {"_id": ObjectId(user_id)}
         card_encrypted : str = bcrypt.generate_password_hash(card).decode("utf-8")
         new_value : dict = {"$set": {"payment_card": card}}
+        return mongo.db.users.update_one(filter_, new_value).acknowledged
+
+    @staticmethod
+    def log_out(user_id : str) -> bool:
+        #Verifica que exista la base de datos y demás datos esten
+        if not user_id or mongo.db is None:
+            return False
+        filter_ : dict = {"_id": ObjectId(user_id)}
+        new_value : dict = {"$set": {"last_login": datetime.now()}}
         return mongo.db.users.update_one(filter_, new_value).acknowledged
