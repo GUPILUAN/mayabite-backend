@@ -55,7 +55,7 @@ class Mail:
                         <body>
                             <p>BIENVENIDO {user.upper()}.<br>
                             Haz clic en el siguiente enlace para verificar tu cuenta:<br>
-                            <a href={self.HOST}/verify/{token}>Click aquí para verificar</a>
+                            <a href={self.HOST}/api/user/verify/{token}>Click aquí para verificar</a>
                             </p>
                         </body>
                     </html>
@@ -66,7 +66,7 @@ class Mail:
                         <body>
                             <p>RESTABLECER CONTRASEÑA.<br>
                             Haz click aquí:<br>
-                            <a href={self.HOST}/reset/{token}>Click aquí para restablecer contraseña</a>
+                            <a href={self.HOST}/api/user/reset/{token}>Click aquí para restablecer contraseña</a>
                             </p>
                         </body>
                     </html>

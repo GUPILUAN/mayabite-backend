@@ -5,11 +5,37 @@ from bson import ObjectId
 
 class User:
     #Model
-    def __init__(self, username :str , email:str, password:str, phone:str)->None:
+    def __init__(self, username :str , email:str, password:str, phone:str) -> None:
         self.username :str = username
         self.email : str = email
         self.password : str= password
         self.phone :str = phone
+        self.is_active: bool = True
+        self.confirmed_account : bool = False
+        self.is_admin : bool = False
+        self.is_delivery_man : bool =  False
+        self.is_working: bool = False
+        self.is_banned : bool =  False
+        self.last_login : datetime | None = None
+        self.created_at : datetime = datetime.now()
+        self.payment_card : str | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "username": self.username,
+            "email": self.email,
+            "password": self.password,
+            "phone": self.phone,
+            "is_active": self.is_active,
+            "confirmed_account": self.confirmed_account,
+            "is_admin": self.is_admin,
+            "is_delivery_man": self.is_delivery_man,
+            "is_working": self.is_working,
+            "is_banned": self.is_banned,
+            "last_login": self.last_login,
+            "created_at": self.created_at,
+            "payment_card": self.payment_card
+        }
 
 
     @staticmethod
@@ -41,25 +67,11 @@ class User:
         #Si pasa todos los filtros encripta la contraseña
         hashed_password : str = bcrypt.generate_password_hash(password).decode("utf-8")
 
-        new_user : dict = {
-            "username": username,
-            "email": email,
-            "password": hashed_password,
-            "phone": phone,
-            "is_active": True,
-            "confirmed_account" : False,
-            "is_admin": False,
-            "is_delivery_man": False,
-            "is_working":False,
-            "is_banned": False,
-            "last_login": None,
-            "created_at": datetime.now(),
-            "payment_card" : None
-        }
+        new_user : User = User(username, email, hashed_password, phone)
 
         #Verdadero si se creó con éxito, Falso si hubo algun problema
-        user_created : bool = mongo.db.users.insert_one(new_user).acknowledged
-        return (new_user,201) if user_created else ({"message" : "Error creating user"},500)
+        user_created : bool = mongo.db.users.insert_one(new_user.to_dict()).acknowledged
+        return (new_user.to_dict(),201) if user_created else ({"message" : "Error creating user"},500)
     
     @staticmethod
     def verify_email(email : str | None) -> dict |None:
@@ -99,7 +111,7 @@ class User:
         #Si encuentra al usuario verifica que su contraseña sea la correcta 
         # y sólo si esta verificado su email, le permite entrar
         if bcrypt.check_password_hash(user["password"], password):
-            if user["confirmed"] == True:
+            if user["confirmed_account"] == True:
                 filter_ : dict = {"email": user["email"]}
                 new_value : dict = {"$set": {"last_login": datetime.now()}}
                 mongo.db.users.update_one(filter_, new_value)
@@ -133,4 +145,3 @@ class User:
         card_encrypted : str = bcrypt.generate_password_hash(card).decode("utf-8")
         new_value : dict = {"$set": {"payment_card": card}}
         return mongo.db.users.update_one(filter_, new_value).acknowledged
-
