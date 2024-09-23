@@ -99,7 +99,7 @@ class User:
         #Si encuentra al usuario verifica que su contraseña sea la correcta 
         # y sólo si esta verificado su email, le permite entrar
         if bcrypt.check_password_hash(user["password"], password):
-            if user["confirmed"] == True:
+            if user["confirmed_account"] == True:
                 filter_ : dict = {"email": user["email"]}
                 new_value : dict = {"$set": {"last_login": datetime.now()}}
                 mongo.db.users.update_one(filter_, new_value)

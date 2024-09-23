@@ -33,6 +33,8 @@ def create_app() -> Flask:
     app.register_blueprint(category_bp)
     from app.routes.featured_route import featured_bp
     app.register_blueprint(featured_bp)
+    from app.routes.order_route import order_bp
+    app.register_blueprint(order_bp)
 
     return app
     
