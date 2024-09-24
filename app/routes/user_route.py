@@ -7,7 +7,7 @@ from app.models.user_model import User
 user_bp : Blueprint = Blueprint("user_bp", __name__)
 
 #Registering route
-@user_bp.route("/user/register", methods = ["POST"])
+@user_bp.route("/api/user/register", methods = ["POST"])
 def register() -> tuple[Response,int]: 
     #Se obtiene los datos del body
     data : dict = request.get_json()
@@ -29,7 +29,7 @@ def register() -> tuple[Response,int]:
 
 
 #Verification route
-@user_bp.route("/user/verify/<token>", methods=["GET"])
+@user_bp.route("/api/user/verify/<token>", methods=["GET"])
 def verify_email(token : str) -> tuple[Response,int]:
     #intenta decodificar el token para saber que email se esta verificando.
     try:
@@ -43,21 +43,23 @@ def verify_email(token : str) -> tuple[Response,int]:
         #return (jsonify({"message" : "Account confirmed"}),200) if user_verified else (jsonify({"message" : "Invalid token"}), 400)
 
 #Login route
-@user_bp.route("/user/login", methods=["POST"])
+@user_bp.route("/api/user/login", methods=["POST"])
 def login() -> tuple[Response,int]:
     #Se obtiene los datos del body
     data : dict = request.get_json()
     #Si el resultado tiene un mensaje significa que hubo un error, de lo contrario arroja el access token
     result : tuple = User.login(data)
+    
     if result[0].get("message"):
         return jsonify(result[0]), result[1]
+    
     access_token : str = create_access_token(identity=result[0].get("email"),expires_delta=timedelta(hours=1))
     #response : Response = make_response(jsonify({"message": "Login succeed"}), 200)
     #response.headers['Authorization'] = f"Bearer {access_token}"
     return jsonify(access_token=access_token),200
 
 
-@user_bp.route('/user/reset_request', methods=['GET', 'POST'])
+@user_bp.route('/api/user/reset_request', methods=['GET', 'POST'])
 def reset_request() -> str | tuple[Response,int]:
     if request.method == 'POST':
         data : dict =  request.get_json()
@@ -77,7 +79,7 @@ def reset_request() -> str | tuple[Response,int]:
     return render_template("reset.html")
 
 #reset password view route
-@user_bp.route("/user/reset/<token>", methods=["GET"])
+@user_bp.route("/api/user/reset/<token>", methods=["GET"])
 def reset_password_view(token : str) -> str | tuple[Response,int]:
     try:
         email : str | None = decode_token(token).get("sub")
@@ -86,7 +88,7 @@ def reset_password_view(token : str) -> str | tuple[Response,int]:
     return render_template("reset_password.html",email=email)
 
 #Reset password route
-@user_bp.route("/user/reset_password", methods=["PATCH", "POST"])
+@user_bp.route("/api/user/reset_password", methods=["PATCH", "POST"])
 def reset_password():
     email: str | None = request.form.get("email")
     password : str | None = request.form.get("new_password")
@@ -100,14 +102,14 @@ def reset_password():
     
 
 #Protected route
-@user_bp.route("/user/protected", methods=["GET"])
+@user_bp.route("/api/user/protected", methods=["GET"])
 @jwt_required()
 def protected() -> tuple[Response,int]:
     current_user : str = get_jwt_identity()
     return jsonify({'message': f'User {current_user} performed a protected action!'}), 200
 
 #Protected route
-@user_bp.route("/user/addpayent", methods=["GET", "POST"])
+@user_bp.route("/api/user/addpayent", methods=["GET", "POST"])
 @jwt_required()
 def add_payment_method() -> tuple[Response,int]:
     current_user : str = get_jwt_identity()
