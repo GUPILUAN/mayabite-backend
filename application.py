@@ -9,7 +9,7 @@ app, socket_io = create_app()
 
 
 # DEV
-if __name__ == "__main__":
+#if __name__ == "__main__":
     # Usamos socket_io.run en lugar de app.run() para que maneje WebSockets
-    socket_io.run(app, debug=True, host="0.0.0.0", port=8080)
+ #   socket_io.run(app, debug=True, host="0.0.0.0", port=8080)
     
