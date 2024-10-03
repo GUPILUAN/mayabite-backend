@@ -3,10 +3,10 @@ from flask_socketio import SocketIO
 from app import create_app
 
 app: Flask
-socket_io: SocketIO
 
-app, socket_io = create_app()
+app = create_app()
 
+socket_io: SocketIO = SocketIO(app)
 
 # DEV
 #if __name__ == "__main__":
