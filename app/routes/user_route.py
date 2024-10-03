@@ -23,9 +23,19 @@ def register() -> tuple[Response,int]:
     
     access_token : str = create_access_token(identity=email, expires_delta=False)
     #Crea insancia de mail que envia automaticamente correo de verificación
+
+    User.add_token(access_token, email)
     username : str = str(result[0].get("username"))
-    Mail(email,access_token,"verify", username)
-    return jsonify({"message" : "User created successfully, please verify the email"}), result[1]
+    mail_sent : str = Mail(email,access_token,"verify", username).status
+    
+    match mail_sent:
+        case "success":
+            return jsonify({"message" : "User created successfully, please verify the email"}), result[1]
+        case "error":
+            return jsonify({"message": "No se pudo enviar el correo de verificación. Se intentará nuevamente cuando inicies sesión."}),400
+        case _:
+            return jsonify({"message":"No se identificó que error sucedió"}),400
+
 
 
 #Verification route
@@ -49,13 +59,20 @@ def login() -> tuple[Response,int]:
     data : dict = request.get_json()
     #Si el resultado tiene un mensaje significa que hubo un error, de lo contrario arroja el access token
     result : tuple = User.login(data)
-    
+    user : dict | None = result[0].get("user")
+    if user:
+        mail_status : str = Mail(user.get("email"), user.get("token"),"verify", user.get("username")).status
+        match mail_status:
+            case "success":
+                return jsonify({"message" : "Account is not confirmed, another verification link was sent, please verify the email"}),400
+            case "error":
+                return jsonify({"message": "No se pudo enviar el correo de verificación."}),400
+            
     if result[0].get("message"):
         return jsonify(result[0]), result[1]
     
+    
     access_token : str = create_access_token(identity=result[0].get("email"),expires_delta=timedelta(hours=1))
-    #response : Response = make_response(jsonify({"message": "Login succeed"}), 200)
-    #response.headers['Authorization'] = f"Bearer {access_token}"
     return jsonify(access_token=access_token),200
 
 
@@ -68,13 +85,31 @@ def reset_request() -> str | tuple[Response,int]:
             return jsonify({"message": "El correo es necesario"}), 400
         # Crear el token de acceso con JWT
         reset_token : str = create_access_token(identity=email, expires_delta=timedelta(minutes=5))
-        try:
-            Mail(email, reset_token, "reset")
-        except:
-            return render_template("reset.html")
+        
+        mail_status : str = Mail(email, reset_token, "reset").status
+        if mail_status == "success":
+            if request.is_json:
+                # Responder con JSON si la petición es JSON
+                response_data = {
+                    'message': 'Restablecimiento de contraseña solicitado',
+                    'status': mail_status,
+                    'details': 'Revisa tu correo para continuar con el proceso.'
+                }
+                return jsonify(response_data), 200
+            response : tuple[Response,int] = make_response(render_template("reset.html", sent = reset_token is not None)),200
+        else:
+            if request.is_json:
+                # Responder con JSON si la petición es JSON
+                response_data = {
+                    'message': 'No se pudo mandar el correo de reestablecimiento',
+                    'status': mail_status,
+                    'details': 'Intenta nuevamente después'
+                }
+                return jsonify(response_data), 400
+            response : tuple[Response,int] = make_response(render_template("reset.html")),400
         # Crear la respuesta JSON
-        response : Response = make_response(render_template("reset.html", sent = reset_token is not None))
-        return response,200
+        
+        return response
     # Si es una solicitud GET, solo renderizamos el formulario
     return render_template("reset.html")
 

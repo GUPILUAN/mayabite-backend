@@ -19,6 +19,7 @@ class User:
         self.last_login : datetime | None = None
         self.created_at : datetime = datetime.now()
         self.payment_card : str | None = None
+        self.token : str | None = None 
 
     def to_dict(self) -> dict:
         return {
@@ -34,7 +35,9 @@ class User:
             "is_banned": self.is_banned,
             "last_login": self.last_login,
             "created_at": self.created_at,
-            "payment_card": self.payment_card
+            "payment_card": self.payment_card,
+            "token" : self.token
+
         }
 
 
@@ -91,6 +94,24 @@ class User:
         return updated_doc
     
     @staticmethod
+    def add_token(token: str, email: str):
+        #Verifica que exista la base de datos
+        if mongo.db is None or email is None or token is None:
+            return
+        #Filtro
+        filter_ : dict = {"email": email}
+        #Valor que se va a cambiar
+        new_value : dict = {"$set": {"token": token}}
+        #Regresa None si no encontró nada, regresa el documento actualizado si lo consigue
+        updated_doc : dict | None = mongo.db.users.find_one_and_update(
+            filter_,
+            new_value,
+            return_document= ReturnDocument.AFTER
+        )
+        return updated_doc
+
+    
+    @staticmethod
     def login(data : dict) -> tuple[dict,int]:
         #Verifica que exista la base de datos
         if mongo.db is None:
@@ -114,7 +135,7 @@ class User:
             if user["confirmed_account"] == True:
                 return {"email" : email},200
             else:
-                return {"message" : "Account not confirmed"}, 401
+                return {"message" : "Account not confirmed", "user": user}, 401
         else:
             return {"message": "Invalid credentials"}, 401
         

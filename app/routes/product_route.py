@@ -50,6 +50,9 @@ def get_products_from(id_store : str) -> tuple[Response,int]:
         "message": "Error al cargar inventario"}
         ), 404)
 
+
+
+
 @product_bp.route("/api/product/", methods=["GET"])
 def template():
     categorias : list = [category["name"] for category in Category.get_category_stores(False)]
@@ -88,3 +91,8 @@ def register_product():
         }), 201) if Product.add_one(prod) else (jsonify({
         "message": "Error en el registro"
         }), 400)
+
+
+
+
+

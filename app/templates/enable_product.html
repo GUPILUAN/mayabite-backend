@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agregar productos</title>
+    <title>Cambiar productos</title>
   </head>
   <body>
-    <h1>Agregar productos</h1>
+    <h1>Cambiar productos</h1>
 
     <form id="productForm">
       <input type="hidden" name="id" id="id" value="{{ id }}" />
@@ -18,13 +18,19 @@
         <option value="{{ producto._id }}">{{ producto.name }}</option>
         {% endfor %}</select
       ><br />
-      <input type="checkbox" name="enabled" id="enabled" hidden checked /><br />
 
       <button type="submit">Agregar al array</button>
     </form>
 
-    <h2>Productos actuales:</h2>
+    <h2>Productos a cambiar:</h2>
+
     <ul id="productList"></ul>
+
+    <label for="enabled">
+      Estos productos se van a activar o desactivar:
+    </label>
+    <input type="checkbox" id="enabled" name="enabled" />
+    <br /><br />
 
     <button id="sendData">Enviar al backend</button>
 
@@ -37,18 +43,14 @@
       const productList = document.getElementById("productList");
       const sendDataButton = document.getElementById("sendData");
 
-      const storeId = document.getElementById("id").value;
-
       // Evento submit para agregar productos al array
       form.addEventListener("submit", function (event) {
         event.preventDefault(); // Evitamos que se recargue la página
         // Obtenemos los valores del formulario
         const productId = document.getElementById("producto").value;
-        const enabled = document.getElementById("enabled").value;
         // Crear un objeto para el producto
         const product = {
           id: productId,
-          enabled: enabled === "on",
         };
 
         // Agregar el objeto al array
@@ -79,8 +81,15 @@
 
       // Evento para enviar los datos al backend
       sendDataButton.addEventListener("click", function () {
+        const enabled = document.getElementById("enabled").checked
+          ? "enable"
+          : "disable";
         // Aquí puedes enviar el array de productos al backend
-        fetch("{{ url_for('store_bp.add_products', id='') }}" + storeId, {
+
+        const url =
+          `{{ url_for('store_bp.stock', id=id, enable='') }}` + enabled;
+
+        fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

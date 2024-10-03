@@ -28,3 +28,4 @@ def get_products_from() -> tuple[Response,int]:
         "message": "Error al cargar inventario"}
         ), 400)
 
+

@@ -41,12 +41,30 @@ def add_products(id : str) -> tuple[Response, int]:
         "message": "Error al agregar inventario"}
         ), 400)
 
+
+@store_bp.route("/api/store/stock/<id>", methods=["GET"])
+def template3(id : str):
+    store_inventory : list = Store.get_store_inventory(id)
+    productos : list = Product.get_all_from(store_inventory,None,None)
+    return render_template('enable_product.html', productos=productos, id=id)
+
+@store_bp.route("/api/store/stock/<id>/<enable>", methods=["POST"])
+def stock(id : str, enable : str) -> tuple[Response, int]:
+    data : list = request.get_json()
+    return (jsonify({
+        "message" : "Inventario agregado exitosamente"
+        }), 200) if Store.product_inventory(id, data, enable == "enable") else (jsonify({
+        "message": "Error al agregar inventario"}
+        ), 400)
+
+
 @store_bp.route("/api/store/<id>", methods=["GET"])
 def get_store(id : str) -> tuple[Response, int]:
     store : dict | None = Store.get_store_by_id(id)
     return (jsonify(store), 200) if store else (jsonify({
         "message": "No se encontró el almacen"
     }), 400)
+
 
 @store_bp.route("/api/store/deleteinventory/<id>", methods=["PUT"])
 def delete_inventory(id : str) -> tuple[Response, int]:

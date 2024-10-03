@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flask Socket.IO</title>
+    <!-- Cargar la librería de Socket.IO desde el CDN -->
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h1>Chat en tiempo real con Flask-SocketIO</h1>
+
+    <div id="messages">
+      <!-- Aquí se mostrarán los mensajes -->
+    </div>
+
+    <input type="text" id="messageInput" placeholder="Escribe un mensaje..." />
+    <button id="sendButton">Enviar</button>
+
+    <script>
+      // Conectar el cliente al servidor Flask-SocketIO
+      const socket = io();
+
+      // Cuando el cliente se conecta
+      socket.on("connect", () => {
+        console.log("Conectado al servidor");
+      });
+
+      // Manejar la recepción de mensajes desde el servidor
+      socket.on("message", (msg) => {
+        console.log("Mensaje recibido del servidor:", msg);
+        const messagesDiv = document.getElementById("messages");
+        const newMessage = document.createElement("p");
+        newMessage.textContent = msg;
+        messagesDiv.appendChild(newMessage);
+      });
+
+      // Enviar mensaje al servidor cuando se hace clic en el botón
+      document.getElementById("sendButton").addEventListener("click", () => {
+        const messageInput = document.getElementById("messageInput").value;
+        socket.send(messageInput); // Enviar mensaje al servidor
+      });
+
+      // Cuando el cliente se desconecta
+      socket.on("disconnect", () => {
+        console.log("Desconectado del servidor");
+      });
+    </script>
+  </body>
+</html>

@@ -139,6 +139,30 @@ class Store:
         return updated_doc
     
     @staticmethod
+    def product_inventory(store_id : str, product_ids : list, enable : bool) -> bool:
+        #Verifica que exista la base de datos
+        if mongo.db is None:
+            return False
+        filter_ : dict = {"_id": ObjectId(store_id)}
+        #Verifica que el almacen exista
+        store : dict | None = mongo.db.stores.find_one(filter_)
+        if store is None:
+            return False
+        #Valor que se va a cambiar 
+        product_ids = [product["id"] for product in product_ids]
+        for product in store["inventory"]:
+            if product["id"] in product_ids:
+                product["enabled"] = enable
+
+        updated_doc : bool = mongo.db.stores.update_one(
+            filter_, 
+            {"$set": {"inventory" : store["inventory"]}},
+        ).acknowledged
+
+        return updated_doc
+    
+    
+    @staticmethod
     def get_a_review(id: str, review_score) -> bool:
         #Verifica que exista la base de datos
         if mongo.db is None:
