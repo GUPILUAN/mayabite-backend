@@ -65,13 +65,13 @@ def get_all_stores() -> tuple[Response, int]:
         }), 400)
 
 @store_bp.route("/api/store/", methods=["GET"])
-def template():
+def template() -> str:
     ubicaciones : list = ["Central", "Salud", "Ingeniería"] 
     categorias : list = [category["name"] for category in Category.get_category_stores(True)]
     return render_template('store_registry.html', ubicaciones=ubicaciones, categorias=categorias)
 
 @store_bp.route("/api/store/register_v", methods=["POST"])
-def register_store():
+def register_store()-> tuple[Response, int] | str:
 
     nombre = request.form.get('nombre')
     ubicacion = request.form.get('ubicacion')
@@ -106,3 +106,9 @@ def register_store():
         }), 400)
 
 
+
+@store_bp.route("/api/store/review/<id>", methods=["POST"])
+def getting_review(id: str)->tuple[Response, int]:
+    data : dict = request.get_json()
+    response = jsonify({"message" : "Success"} if Store.get_a_review(id,data["score"]) else {"message":"Error"}),200
+    return response

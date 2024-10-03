@@ -23,7 +23,7 @@ def create_feature()-> tuple[Response,int]:
 @featured_bp.route("/api/featured/getfrom/", methods=['GET'])
 def get_products_from() -> tuple[Response,int]:
     stores : list | None = Store.get_all_stores()
-    featured_list : list = Featured.setInfo(stores)
+    featured_list : list = Featured.set_info_from_stores(stores)
     return (jsonify(featured_list), 200) if len(featured_list) > 0 else (jsonify({
         "message": "Error al cargar inventario"}
         ), 400)
