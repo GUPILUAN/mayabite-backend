@@ -18,7 +18,7 @@ def create_app() -> tuple[Flask, SocketIO]:
     #Inicializamos CORS
     cors.init_app(app)
     #Inicializamos el socket.io
-    socket_io.init_app(app, cors_allowed_origins="*",  async_mode='eventlet')
+    socket_io.init_app(app, cors_allowed_origins="*",  async_mode="gevent")
     #Inicializamos la conexión con Mongo
     mongo.init_app(app)
     #Inicializamos el encriptador de contraseñas
@@ -41,8 +41,8 @@ def create_app() -> tuple[Flask, SocketIO]:
     app.register_blueprint(order_bp)
     from app.routes.message_route import message_bp
     app.register_blueprint(message_bp)
+    from events.socket_events import register_websocket_events
+    register_websocket_events(socket_io)
 
-
-
-    return (app, socket_io)
+    return app, socket_io
     
