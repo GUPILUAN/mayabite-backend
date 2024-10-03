@@ -4,7 +4,7 @@ from app.config.config import Config
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO
 
 mongo : PyMongo = PyMongo()
 bcrypt : Bcrypt = Bcrypt()
@@ -18,7 +18,7 @@ def create_app() -> tuple[Flask, SocketIO]:
     #Inicializamos CORS
     cors.init_app(app)
     #Inicializamos el socket.io
-    socket_io.init_app(app, cors_allowed_origins="*")
+    socket_io.init_app(app, cors_allowed_origins="*",  async_mode='eventlet')
     #Inicializamos la conexión con Mongo
     mongo.init_app(app)
     #Inicializamos el encriptador de contraseñas
