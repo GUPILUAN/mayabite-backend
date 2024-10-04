@@ -41,8 +41,8 @@ def create_app() -> tuple[Flask, SocketIO]:
     app.register_blueprint(order_bp)
     from app.routes.message_route import message_bp
     app.register_blueprint(message_bp)
-    from events.socket_events import register_websocket_events
-    register_websocket_events(socket_io)
+    import app.events.socket_events as events
+    events.start_watching_collections()
 
     return app, socket_io
     

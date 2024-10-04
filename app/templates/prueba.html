@@ -27,11 +27,11 @@
       });
 
       // Manejar la recepción de mensajes desde el servidor
-      socket.on("message", (msg) => {
+      socket.on("response", (msg) => {
         console.log("Mensaje recibido del servidor:", msg);
         const messagesDiv = document.getElementById("messages");
         const newMessage = document.createElement("p");
-        newMessage.textContent = msg;
+        newMessage.textContent = msg.data;
         messagesDiv.appendChild(newMessage);
       });
 

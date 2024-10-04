@@ -1,10 +1,8 @@
 from flask import Blueprint, request, make_response, jsonify, render_template, Response
 from flask_jwt_extended import create_access_token, jwt_required, decode_token, get_jwt_identity
-from datetime import timedelta
 from app.models.store_model import Store
 from app.models.category_model import Category
 from app.models.product_model import Product
-from app.models.featured_model import Featured
 
 store_bp : Blueprint = Blueprint("store_bp", __name__)
 
