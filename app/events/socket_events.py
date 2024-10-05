@@ -21,7 +21,7 @@ def handle_message(data):
 
     
 def watch_collection(collection_name):
-    if mongo.db is None or not mongo.cx or not mongo.cx._opened:
+    if mongo.db is None or not mongo.cx:
         return
     
     print(f"Escuchando cambios en la colección {collection_name}...")
