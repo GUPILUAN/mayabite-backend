@@ -5,6 +5,7 @@ from app.models.category_model import Category
 category_bp : Blueprint = Blueprint("category_bp", __name__)
 
 @category_bp.route("/api/category/getall", methods=["GET"])
+@jwt_required()
 def get_categories() -> tuple[Response,int]:
     categories : list = Category.get_all_categories()
     return jsonify(categories),200

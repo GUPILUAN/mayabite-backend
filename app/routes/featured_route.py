@@ -7,6 +7,7 @@ from app.models.store_model import Store
 featured_bp : Blueprint = Blueprint("featured_bp", __name__)
 
 @featured_bp.route("/api/featured/getall", methods=["GET"])
+@jwt_required()
 def get_featured() -> tuple[Response,int]:
     featured : list = Featured.get_all_featured()
     return jsonify(featured),200
@@ -20,7 +21,8 @@ def create_feature()-> tuple[Response,int]:
         "message":"Category not created"
         }), 400)
     
-@featured_bp.route("/api/featured/getfrom/", methods=['GET'])
+@featured_bp.route("/api/featured/getfrom", methods=['GET'])
+@jwt_required()
 def get_products_from() -> tuple[Response,int]:
     stores : list | None = Store.get_all_stores()
     featured_list : list = Featured.set_info_from_stores(stores)

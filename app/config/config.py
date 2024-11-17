@@ -24,19 +24,21 @@ class Mail:
     HOST : str | None = os.getenv("HOST")  # Host de la página que redirige al verificar la cuenta
     status : str = ""
 
-    def __init__(self, receiver: str, token: str, purpose: str, user: str = "") -> None:
+    def __init__(self, receiver: str, id_or_token: str, purpose: str, user: str = "") -> None:
         if not self.MAIL or not self.MAIL_PASSWORD or not self.MAIL_SERVER:  
             return
         
         subject: str = "Verifica tu cuenta" if purpose == "verify" else "Restablecimiento de contraseña"
     
-        body_html: str = self.verification(token, user) if purpose == "verify" else self.reset(token)
-        body_text: str = f"{user.upper()}, sigue este enlace para {purpose}: {self.HOST}/api/user/{purpose}/{token}"
+        body_html: str = self.verification(id_or_token, user) if purpose == "verify" else self.reset(id_or_token)
+        body_text: str = f"{user.upper()}, el siguiente te ayuda para {purpose}: {self.HOST}/api/user/{purpose}/{id_or_token}"
 
         message: MIMEMultipart = MIMEMultipart("alternative")
         message["From"] = f"Mayabite Team <{self.MAIL}>"
         message["To"] = receiver
         message["Subject"] = subject
+        message["Reply-To"] = f"{self.MAIL}" 
+
 
         message.attach(MIMEText(body_text, "plain"))
         message.attach(MIMEText(body_html, "html"))
@@ -58,7 +60,7 @@ class Mail:
             if server:
                 server.quit()
 
-    def verification(self, token: str, user: str) -> str:
+    def verification(self, id: str, user: str) -> str:
         email_body = f"""
                         <html>
                             <head>
@@ -102,8 +104,8 @@ class Mail:
                             <body>
                                 <div class="container">
                                     <h1>¡BIENVENIDO, {user.upper()}!</h1>
-                                    <p>Gracias por registrarte en nuestro servicio. Para completar el proceso de verificación de tu cuenta, por favor haz clic en el enlace a continuación:</p>
-                                    <p><a href="{self.HOST}/api/user/verify/{token}">ENLACE DE VERIFICACIÓN</a></p>
+                                    <p>Gracias por registrarte en nuestro servicio. Para completar el proceso de verificación de tu cuenta, por favor haz sigue el enlace a continuación:</p>
+                                    <p><a href="{self.HOST}/api/user/verify/{id}">ENLACE DE VERIFICACIÓN</a></p>
                                     <p>Si no solicitaste esta verificación, puedes ignorar este mensaje de manera segura.</p>
                                     <p class="footer">Este es un correo automático enviado por Mayabite. Por favor, no respondas a este mensaje.</p>
                                 </div>
@@ -156,11 +158,11 @@ class Mail:
                                     </head>
                                     <body>
                                         <div class="container">
-                                            <h1>Restablecimiento de Contraseña</h1>
-                                            <p>Se ha solicitado el restablecimiento de tu contraseña. Para cambiarla, por favor sigue el enlace a continuación:</p>
-                                            <p><a href="{self.HOST}/api/user/reset/{token}">ENLACE PARA CAMBIAR CONTRASEÑA</a></p>
-                                            <p>Si no solicitaste este cambio, puedes ignorar este mensaje de manera segura.</p>
-                                            <p class="footer">Este es un correo automático enviado por Mayabite. Por favor, no respondas a este mensaje.</p>
+                                            <h1>Restablecer tu contraseña</h1>
+                                            <p>Parece que solicitaste un cambio de contraseña. Si lo hiciste, puedes seguir el enlace a continuación para actualizarla:</p>
+                                            <p><a href="{self.HOST}/api/user/reset/{token}">Actualizar mi contraseña</a></p>
+                                            <p>Si no solicitaste esto, no necesitas hacer nada.</p>
+                                            <p class="footer">Este correo es automático. Si necesitas ayuda adicional, no dudes en visitarnos en nuestro sitio web.</p>
                                         </div>
                                     </body>
                                 </html>
