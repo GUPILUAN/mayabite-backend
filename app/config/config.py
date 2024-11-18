@@ -3,42 +3,63 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
-load_dotenv() #importa a las variables de entorno que se encuentran en el .env
+
+load_dotenv()  # importa a las variables de entorno que se encuentran en el .env
+
 
 class Config:
-    MONGO_URI : str | None  = os.getenv("MONGO_URI") #MONGO URI en el .env
-    JWT_SECRET_KEY : str | None = os.getenv("JWT_SECRET_KEY") #JWT SECRET KEY en el .env
-    BCRYPT_LOG_ROUNDS : int = 12 #salty del JWT
-    MAX_CONTENT_LENGTH : int = 16 * 1024 * 1024
-    
+    MONGO_URI: str | None = os.getenv("MONGO_URI")  # MONGO URI en el .env
+    JWT_SECRET_KEY: str | None = os.getenv(
+        "JWT_SECRET_KEY"
+    )  # JWT SECRET KEY en el .env
+    BCRYPT_LOG_ROUNDS: int = 12  # salty del JWT
+    MAX_CONTENT_LENGTH: int = 16 * 1024 * 1024
+
+
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-class Mail:
-    MAIL_SERVER : str | None = os.getenv("MAIL_SERVER")  # Servicio de mail que se usa en el remitente 
-    MAIL_PORT : int = 587  # Puerto seguro
-    MAIL_USE_TLS : bool = True
-    MAIL : str | None = os.getenv("MAIL")  # Mail del remitente
-    MAIL_PASSWORD : str | None = os.getenv("MAIL_PASSWORD")  # Password del remitente
-    HOST : str | None = os.getenv("HOST")  # Host de la página que redirige al verificar la cuenta
-    status : str = ""
 
-    def __init__(self, receiver: str, id_or_token: str, purpose: str, user: str = "") -> None:
-        if not self.MAIL or not self.MAIL_PASSWORD or not self.MAIL_SERVER:  
+class Mail:
+    MAIL_SERVER: str | None = os.getenv(
+        "MAIL_SERVER"
+    )  # Servicio de mail que se usa en el remitente
+    MAIL_PORT: int = 587  # Puerto seguro
+    MAIL_USE_TLS: bool = True
+    MAIL: str | None = os.getenv("MAIL")  # Mail del remitente
+    MAIL_PASSWORD: str | None = os.getenv("MAIL_PASSWORD")  # Password del remitente
+    HOST: str | None = os.getenv(
+        "HOST"
+    )  # Host de la página que redirige al verificar la cuenta
+    status: str = ""
+
+    def __init__(
+        self, receiver: str, id_or_token: str, purpose: str, user: str = ""
+    ) -> None:
+        if not self.MAIL or not self.MAIL_PASSWORD or not self.MAIL_SERVER:
             return
-        
-        subject: str = "Verifica tu cuenta" if purpose == "verify" else "Restablecimiento de contraseña"
-    
-        body_html: str = self.verification(id_or_token, user) if purpose == "verify" else self.reset(id_or_token)
-        body_text: str = f"{user.upper()}, el siguiente te ayuda para {purpose}: {self.HOST}/api/user/{purpose}/{id_or_token}"
+
+        subject: str = (
+            "Verifica tu cuenta"
+            if purpose == "verify"
+            else "Restablecimiento de contraseña"
+        )
+
+        body_html: str = (
+            self.verification(id_or_token, user)
+            if purpose == "verify"
+            else self.reset(id_or_token)
+        )
+        body_text: str = (
+            f"{user.upper()}, el siguiente te ayuda para {purpose}: {self.HOST}/api/user/{purpose}/{id_or_token}"
+        )
 
         message: MIMEMultipart = MIMEMultipart("alternative")
         message["From"] = f"Mayabite Team <{self.MAIL}>"
         message["To"] = receiver
         message["Subject"] = subject
-        message["Reply-To"] = f"{self.MAIL}" 
-
+        message["Reply-To"] = f"{self.MAIL}"
 
         message.attach(MIMEText(body_text, "plain"))
         message.attach(MIMEText(body_html, "html"))
@@ -46,8 +67,8 @@ class Mail:
         server: smtplib.SMTP | None = None
         try:
             server = smtplib.SMTP(self.MAIL_SERVER, self.MAIL_PORT)
-            server.starttls()  
-            server.login(self.MAIL, self.MAIL_PASSWORD)  
+            server.starttls()
+            server.login(self.MAIL, self.MAIL_PASSWORD)
             server.sendmail(self.MAIL, receiver, message.as_string())
             print("Correo enviado exitosamente")
             self.status = "success"

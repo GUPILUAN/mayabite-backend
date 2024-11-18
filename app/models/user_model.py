@@ -3,6 +3,7 @@ from app import mongo, bcrypt
 from datetime import datetime, timedelta
 import pytz
 from bson import ObjectId
+import re
 
 
 class User:
@@ -77,11 +78,17 @@ class User:
             return {"message": "Data error"}, 400
 
         # Verifica que solo los correos que sean de la anahuac puedan registrarse
-        valid_email: bool = email.endswith("@anahuac.mx")
+        # valid_email: bool = email.endswith("@anahuac.mx")
+        # if not valid_email:
+        #   return {"message": "Only anahuac.mx emails are allowed"}, 400
+
+        email_regex = r"^[^@]+@[^@]+\.[^@]+$"
+        if not re.match(email_regex, email):
+            return {"message": "Invalid email"}, 400
+
         # Verifica que el mismo correo no intente registrarse de nuevo
         email_already_used: bool = mongo.db.users.find_one({"email": email}) is not None
-        if not valid_email:
-            return {"message": "Only anahuac.mx emails are allowed"}, 400
+
         if email_already_used:
             return {"message": "email already used"}, 400
 
