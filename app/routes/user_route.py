@@ -309,3 +309,8 @@ def get_info(id: str) -> tuple[Response, int] | None:
     if user is None:
         return jsonify({"message": "User not found"}), 404
     return jsonify(user), 200
+
+
+@user_bp.route("/api/user/new/hello", methods=["GET"])
+def hello():
+    return jsonify({"message": "Hello, World!"}), 200
