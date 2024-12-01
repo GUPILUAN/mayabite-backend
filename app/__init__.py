@@ -14,7 +14,7 @@ socket_io: SocketIO = SocketIO()
 
 
 def create_app() -> tuple[Flask, SocketIO]:
-    app = Flask(__name__)
+    app: Flask = Flask(__name__)
     app.config.from_object(Config)
     # Inicializamos CORS
     cors.init_app(app)
