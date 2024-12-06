@@ -6,10 +6,10 @@ import base64
 class Store:
     # Model
     def __init__(
-        self, name: str, location: str, description: str, image: bytes, category: str
+        self, name: str, location: dict, description: str, image: bytes, category: str
     ) -> None:
         self.name: str = name
-        self.location: str = location
+        self.location: dict = location
         self.description: str = description
         self.image: bytes = image
         self.category: str = category
@@ -53,7 +53,7 @@ class Store:
 
         # Tipado para documentación
         name: str
-        location: str
+        location: dict
         description: str
         image: bytes
         category: str
