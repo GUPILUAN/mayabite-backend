@@ -38,6 +38,23 @@
 
       <!-- Ubicación -->
       <label for="ubicacion">Ubicación:</label><br />
+      <input
+        style="width: 300px"
+        type="text"
+        id="longitud"
+        name="longitud"
+        placeholder="longitud"
+        required
+      /><br /><br />
+      <input
+        style="width: 300px"
+        type="text"
+        id="latitud"
+        name="latitud"
+        placeholder="latitud"
+        required
+      /><br /><br />
+
       <select id="ubicacion" name="ubicacion" required>
         {% for ubicacion in ubicaciones %}
         <option value="{{ ubicacion }}">{{ ubicacion }}</option>

@@ -111,6 +111,8 @@ def register_store() -> tuple[Response, int] | str:
 
     nombre = request.form.get("nombre")
     ubicacion = request.form.get("ubicacion")
+    longitud = request.form.get("longitud")
+    latitud = request.form.get("latitud")
     categoria = request.form.get("categoria")
     descripcion = request.form.get("descripcion")
 
@@ -127,19 +129,22 @@ def register_store() -> tuple[Response, int] | str:
     else:
         imagen_binaria = None
 
-    store: dict = {
-        "name": nombre,
-        "location": ubicacion,
-        "category": categoria,
-        "image": imagen_binaria,
-        "description": descripcion,
-    }
+    try:
+        store: dict = {
+            "name": nombre,
+            "location": {"name": ubicacion, "latitude": latitud, "longitude": longitud},
+            "category": categoria,
+            "image": imagen_binaria,
+            "description": descripcion,
+        }
 
-    return (
-        (jsonify({"message": "Registro exitoso"}), 201)
-        if Store.register_store(store)
-        else (jsonify({"message": "Error en el registro"}), 400)
-    )
+        return (
+            (jsonify({"message": "Registro exitoso"}), 201)
+            if Store.register_store(store)
+            else (jsonify({"message": "Error en el registro"}), 400)
+        )
+    except:
+        return jsonify({"message": "Error en el registro"}), 400
 
 
 @store_bp.route("/api/store/review/<id>", methods=["POST"])
